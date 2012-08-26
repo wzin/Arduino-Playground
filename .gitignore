@@ -10,3 +10,6 @@
 *.lai
 *.la
 *.a
+.DS_Store
+Thumbs.db
+
