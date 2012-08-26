@@ -479,11 +479,11 @@ void loop()
   //Adapting the scale for mapping
   
   scale_x[0] = min(current_coordinates[0],previous_scale_x[0]);
-  scale_y[0] = min(current_coordinates[1],previous_scale_x[0]);
-  scale_z[0] = min(current_coordinates[2],previous_scale_x[0]);
+  scale_y[0] = min(current_coordinates[1],previous_scale_y[0]);
+  scale_z[0] = min(current_coordinates[2],previous_scale_z[0]);
   scale_x[1] = max(current_coordinates[0],previous_scale_x[1]);
-  scale_y[1] = max(current_coordinates[1],previous_scale_x[1]);
-  scale_z[1] = max(current_coordinates[2],previous_scale_x[1]);
+  scale_y[1] = max(current_coordinates[1],previous_scale_y[1]);
+  scale_z[1] = max(current_coordinates[2],previous_scale_z[1]);
   
   //Mapowanie
   x = map(current_coordinates[0],scale_x[0],scale_x[1],0,127);
