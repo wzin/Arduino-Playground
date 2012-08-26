@@ -616,6 +616,6 @@ void loop()
   Serial.print(y);
   Serial.print(" \tz: ");
   Serial.print(z);
-  Serial.print("\tG*10^-2");
+  Serial.print("\tBLAH");
   delay(500); //make it readable
 }
