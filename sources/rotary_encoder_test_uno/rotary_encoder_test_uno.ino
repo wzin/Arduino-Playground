@@ -1,11 +1,11 @@
-# encoder(PIN A) -> A0
-# encoder(PIN B) -> A1
-# *PIN A and B are located on the both sides of encoder
-# encoder(PIN MIDDLE) -> ground
-#/* Rotary encoder read example */
-#define ENC_A 14
-#define ENC_B 15
-#define ENC_PORT PINC
+//encoder(PIN A) -> A0
+//encoder(PIN B) -> A1
+//*PIN A and B are located on the both sides of encoder
+//encoder(PIN MIDDLE) -> ground
+/* Rotary encoder read example */
+#define ENC_A 10  
+#define ENC_B 11
+#define ENC_PORT PINE
 int magicnumber = 2;
  
 void setup()
@@ -15,7 +15,7 @@ void setup()
   digitalWrite(ENC_A, HIGH);
   pinMode(ENC_B, INPUT);
   digitalWrite(ENC_B, HIGH);
-  Serial.begin (115200);
+  Serial.begin (9600);
   Serial.println("Start");
 }
  
