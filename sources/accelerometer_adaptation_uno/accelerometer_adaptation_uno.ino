@@ -517,10 +517,10 @@ void loop()
     scale_x[1] = scale_x[1] -2 ;
     scale_y[1] = scale_y[1] -2 ;
     scale_z[1] = scale_z[1] -2 ;
-    Serial.println("Adaptation commited");
+   // Serial.println("Adaptation commited");
     counter = 0;
   }
-  
+ /* 
   Serial.println();
   Serial.print("X: ");
   Serial.print(scale_x[0]);
@@ -567,7 +567,7 @@ void loop()
   
   delay(1000);
   counter++;
-  
+  */
 /*
   Serial.print("\nx: ");
   Serial.print(x);
@@ -576,22 +576,20 @@ void loop()
   Serial.print(" \tz: ");
   Serial.print(z);
   Serial.print("\tG*10^-2");
- delay(500); //make it readable
-*/  
- /*
-      Serial.write(0xB0); // MIDI control change; channel 3
-      Serial.write(0x2A); // MIDI controller #1
-      Serial.write(current_coordinates[0]); // MIDI controller value of 127
-      
-     Serial.write(0xB0); // MIDI control change; channel 3
-     Serial.write(0x2B); // MIDI controller #1
-     Serial.write(current_coordinates[1]); // MIDI controller value of 127
-     
-     Serial.write(0xB0); // MIDI control change; channel 3
-     Serial.write(0x2C); // MIDI controller #1
-     Serial.write(current_coordinates[2]); // MIDI controller value of 127
+ delay(500); //make it readable  
 */
-
+      Serial1.write(0xB0); // MIDI control change; channel 3
+      Serial1.write(0x2A); // MIDI controller #1
+      Serial1.write(x); // MIDI controller value of 127
+      
+     Serial1.write(0xB0); // MIDI control change; channel 3
+     Serial1.write(0x2B); // MIDI controller #1
+     Serial1.write(y); // MIDI controller value of 127
+     
+     Serial1.write(0xB0); // MIDI control change; channel 3
+     Serial1.write(0x2C); // MIDI controller #1
+     Serial1.write(z); // MIDI controller value of 127
+delay(10);
 }
 
 

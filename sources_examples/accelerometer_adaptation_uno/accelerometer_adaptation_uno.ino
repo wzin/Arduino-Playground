@@ -452,10 +452,14 @@ int scale_z[] = {-50,50}; // needs tuning
 int previous_scale_x[] = {-0,0}; //tuning needed
 int previous_scale_y[] = {-0,0}; //tuning needed
 int previous_scale_z[] = {-0,0}; //tuning needed
+int x_previous;
+int y_previous;
+int z_previous;
 
 void setup()
 {
   Serial.begin(9600);
+  Serial1.begin(9600);
   accelero.begin(13, 12, 11, 10, A0, A1, A2); // (int sleepPin, int selfTestPin, int zeroGPin, int gSelectPin, int xPin, int yPin, int zPin);
                                               // WAŻNE: podłączyć 3V3 do AREF'u!!!!
   accelero.setARefVoltage(3.3); //sets the AREF voltage to 3.3V
@@ -491,6 +495,9 @@ void loop()
   z = map(current_coordinates[2],scale_z[0],scale_z[1],0,127);
   
   //Zapisanie stanu
+  x_previous = x;
+  y_previous = y;
+  z_previous = z;
   //min
   previous_scale_x[0] = scale_x[0] ;
   previous_scale_y[0] = scale_y[0] ;
@@ -500,27 +507,27 @@ void loop()
   previous_scale_y[1] = scale_y[1] ;
   previous_scale_z[1] = scale_z[1] ;
   
-  if(counter == 10 ) { //set period of adaptation
+  if(counter == 500 ) { //set period of adaptation
     //min
-    previous_scale_x[0] = previous_scale_x[0] +1 ;
-    previous_scale_y[0] = previous_scale_y[0] +1 ;
-    previous_scale_z[0] = previous_scale_z[0] +1 ;
+    previous_scale_x[0] = previous_scale_x[0] + 1 ;
+    previous_scale_y[0] = previous_scale_y[0] + 1 ;
+    previous_scale_z[0] = previous_scale_z[0] + 1 ;
     //max
-    previous_scale_x[1] = previous_scale_x[1] -2 ;
-    previous_scale_y[1] = previous_scale_y[1] -2 ;
-    previous_scale_z[1] = previous_scale_z[1] -2 ;
+    previous_scale_x[1] = previous_scale_x[1] - 1 ;
+    previous_scale_y[1] = previous_scale_y[1] - 1 ;
+    previous_scale_z[1] = previous_scale_z[1] - 1 ;
     //min
-    scale_x[0] = scale_x[0] +1 ;
-    scale_y[0] = scale_y[0] +1 ;
-    scale_z[0] = scale_z[0] +1 ;
+    scale_x[0] = scale_x[0] + 1 ;
+    scale_y[0] = scale_y[0] + 1 ;
+    scale_z[0] = scale_z[0] + 1 ;
     //max
-    scale_x[1] = scale_x[1] -2 ;
-    scale_y[1] = scale_y[1] -2 ;
-    scale_z[1] = scale_z[1] -2 ;
-    Serial.println("Adaptation commited");
+    scale_x[1] = scale_x[1] - 1 ;
+    scale_y[1] = scale_y[1] - 1 ;
+    scale_z[1] = scale_z[1] - 1 ;
+    //Serial.println("Adaptation commited");
     counter = 0;
   }
-  
+/*
   Serial.println();
   Serial.print("X: ");
   Serial.print(scale_x[0]);
@@ -564,9 +571,28 @@ void loop()
   Serial.print(z);
   Serial.println();
   Serial.println("-------------");
-  
-  delay(1000);
+*/
+
+    //smoothing
+    x = (x + x_previous)/2;
+    y = (y + y_previous)/2;
+    z = (z + z_previous)/2;
+
+     Serial1.write(0xB0); // MIDI control change; channel 3
+     Serial1.write(0x2A); // MIDI controller #1
+     Serial1.write(x); // MIDI controller value of 127
+      
+     Serial1.write(0xB0); // MIDI control change; channel 3
+     Serial1.write(0x2B); // MIDI controller #1
+     Serial1.write(y); // MIDI controller value of 127
+     
+     Serial1.write(0xB0); // MIDI control change; channel 3
+     Serial1.write(0x2C); // MIDI controller #1
+     Serial1.write(z); // MIDI controller value of 127
+ 
+  delay(10);
   counter++;
+  
   
 /*
   Serial.print("\nx: ");

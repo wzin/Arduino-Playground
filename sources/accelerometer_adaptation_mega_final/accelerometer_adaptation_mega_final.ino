@@ -1,84 +1,3 @@
-/****************************************************************************************************************
- * acceleroMMA7361.h - Library for retrieving data from the MMA7361
-accelerometer.                              *
- * Copyright 2011 Jef Neefs (neefs@gmail.com) and Jeroen Doggen
-(jeroendoggen@gmail.com)                        *
- * DATASHEET: http://www.sparkfun.com/datasheets/Components/General/MMA7361L.pdf
-                               *
- ****************************************************************************************************************
- * Version History:
-                                         *
- *  Version 0.1: -get raw values
-                                         *
- *  Version 0.2: -get voltages and G forces
-                                         *
- *  Version 0.3: -removed begin parameters offset
-                                         *
- *               -added public function setOffSets(int,int,int)
-                                         *
- *               -added a private variable _offSets[3] containing the
-offset on each axis                       *
- *               -changed long and double return values of private and
-public functions to int                  *
- *  Version 0.4: -added calibrate
-                                         *
- *  Version 0.5: -added setARefVoltage
-                                         *
- *               -added setAveraging
-                                         *
- *               -added a default begin function
-                                         *
- *  Version 0.6: -added getAccelXYZ to get all axis in one call
-                                         *
- *               -added getTotalVector returns the magnitude of the
-total vector as an integer                  *
- *               -added getOrientation returns which axis
-perpendicular with the earths surface x=1,y=2,z=3     *
- *                is positive or negative depending on which side of
-the axis is pointing downwards             *
- *  Version 0.7: -added setSensitivity
-                                         *
- *               -added sleep & wake
-                                         *
- *  Version 0.8: -converted to Arduino 1.0 library
-                                         *
- *               -changed license to LGPL
-                                         *
- * Roadmap:
-                                         *
- *  Version 0.x: auto zero calibration
-http://www.freescale.com/files/sensors/doc/app_note/AN3447.pdf
-  *
- *  Version 0.x: We asumed the output to be linear, it is nearly
-linear but not exectly...                  .   *
- ****************************************************************************************************************
- * This library is free software; you can redistribute it and/or
-                                         *
- * modify it under the terms of the GNU Lesser General Public
-                                         *
- * License as published by the Free Software Foundation; either
-                                         *
- * version 2.1 of the License, or (at your option) any later version.
-                                         *
- *
-                                         *
- * This library is distributed in the hope that it will be useful,
-                                         *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-                                         *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-                                         *
- * Lesser General Public License for more details.
-                                         *
- *
-                                         *
- * You should have received a copy of the GNU Lesser General Public
-                                         *
- * License along with this library; if not, write to the Free Software
-                                         *
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-02110-1301  USA                                   *
- ***************************************************************************************************************/
 #ifndef AcceleroMMA7361_h
 #define AcceleroMMA7361_h
 #include <Arduino.h>
@@ -130,86 +49,16 @@ gSelectPin, int xPin, int yPin, int zPin);
                 boolean _sensi;
 };
 #endif
-/****************************************************************************************
- * acceleroMMA7361.h - Library for retrieving data from the MMA7361
-accelerometer.      *
- * For more information: variable declaration, changelog,... see
-AcceleroMMA7361.h          *
- ****************************************************************************************
- * This library is free software; you can redistribute it and/or
-                 *
- * modify it under the terms of the GNU Lesser General Public
-                 *
- * License as published by the Free Software Foundation; either
-                 *
- * version 2.1 of the License, or (at your option) any later version.
-                 *
- *
-                 *
- * This library is distributed in the hope that it will be useful,
-                 *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-                 *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-                 *
- * Lesser General Public License for more details.
-                 *
- *
-                 *
- * You should have received a copy of the GNU Lesser General Public
-                 *
- * License along with this library; if not, write to the Free Software
-                 *
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-02110-1301  USA           *
- ***************************************************************************************/
-/// <summary>
-/// acceleroMMA7361.cpp - Library for retrieving data from the MMA7361
 
-/// For more information: variable declaration, changelog,... see
-
-/// </summary>
-
-
-/// <summary>
-/// constructor
-/// </summary>
 AcceleroMMA7361::AcceleroMMA7361()
 {
 }
 
-/// <summary>
-/// begin function to set pins: sleepPin = 13, selfTestPin = 12,
-
-/// When you use begin() with an empty parameter list, these standard
-
-/// </summary>
 void AcceleroMMA7361::begin()
 {
         begin(13, 12, 11, 10, A0, A1, A2);
 }
 
-/// <summary>
-/// begin variables
-/// - int sleepPin: number indicating to which pin the sleep port is
-
-/// - int selfTestPin: number indicating to which pin the selftest
-
-/// - int zeroGPin: number indicating to which pin the ZeroGpin is
-
-/// - int gSelectPin: number indication to which pin the Gselect is
-
-/// - int xPin: number indicating to which pin the x-axis pin is
-
-/// - int yPin: number indicating to which pin the y-axis  pin is
-
-/// - int zPin: number indicating to which pin the z-axis  pin is
-
-/// - int offset: array indicating the G offset on the x,y and z-axis
-/// When you use begin() without variables standard values are loaded:
-
-
-/// </summary>
 void AcceleroMMA7361::begin(int sleepPin, int selfTestPin, int
 zeroGPin, int gSelectPin, int xPin, int yPin, int zPin)
 {
@@ -578,7 +427,6 @@ int AcceleroMMA7361::getOrientation()
         }
         return 0;
 }
-
 /// <summary>
 /// getTotalVector returns the magnitude of the total acceleration
 
@@ -591,31 +439,178 @@ square(_mapMMA7361G(getYRaw())) + square(_mapMMA7361G(getZRaw())));
 
 
 AcceleroMMA7361 accelero;
+
 int x;
 int y;
 int z;
+int i;
+int counter = 0;
+int current_coordinates[] = {0,0,0};
+int scale_x[] = {-50,50}; // needs tuning
+int scale_y[] = {-50,50}; // needs tuning
+int scale_z[] = {-50,50}; // needs tuning
+int previous_scale_x[] = {-0,0}; //tuning needed
+int previous_scale_y[] = {-0,0}; //tuning needed
+int previous_scale_z[] = {-0,0}; //tuning needed
 
 void setup()
 {
   Serial.begin(9600);
+  Serial2.begin(9600);
   accelero.begin(13, 12, 11, 10, A0, A1, A2); // (int sleepPin, int selfTestPin, int zeroGPin, int gSelectPin, int xPin, int yPin, int zPin);
                                               // WAŻNE: podłączyć 3V3 do AREF'u!!!!
   accelero.setARefVoltage(3.3); //sets the AREF voltage to 3.3V
   accelero.setSensitivity(HIGH); //sets the sensitivity to +/-6G
   accelero.calibrate();
+  
 }
 
 void loop()
 {
-  x = accelero.getXAccel();
-  y = accelero.getYAccel();
-  z = accelero.getZAccel();
+  //Reading the accelerometer coordinates values
+  current_coordinates[0] = accelero.getXAccel();
+  current_coordinates[1] = accelero.getYAccel();
+  current_coordinates[2] = accelero.getZAccel();
+  
+  //Normalization
+  for(i=0; i++ ; i < 3) {
+  current_coordinates[i] = normalize(current_coordinates[i]);
+  }
+  
+  //Adapting the scale for mapping
+  
+  scale_x[0] = min(current_coordinates[0],previous_scale_x[0]);
+  scale_y[0] = min(current_coordinates[1],previous_scale_x[0]);
+  scale_z[0] = min(current_coordinates[2],previous_scale_x[0]);
+  scale_x[1] = max(current_coordinates[0],previous_scale_x[1]);
+  scale_y[1] = max(current_coordinates[1],previous_scale_x[1]);
+  scale_z[1] = max(current_coordinates[2],previous_scale_x[1]);
+  
+  //Mapowanie
+  x = map(current_coordinates[0],scale_x[0],scale_x[1],0,127);
+  y = map(current_coordinates[1],scale_y[0],scale_y[1],0,127);
+  z = map(current_coordinates[2],scale_z[0],scale_z[1],0,127);
+  
+  //Zapisanie stanu
+  //min
+  previous_scale_x[0] = scale_x[0] ;
+  previous_scale_y[0] = scale_y[0] ;
+  previous_scale_z[0] = scale_z[0] ;
+  //max
+  previous_scale_x[1] = scale_x[1] ;
+  previous_scale_y[1] = scale_y[1] ;
+  previous_scale_z[1] = scale_z[1] ;
+  
+  if(counter == 10 ) { //set period of adaptation
+    //min
+    previous_scale_x[0] = previous_scale_x[0] +1 ;
+    previous_scale_y[0] = previous_scale_y[0] +1 ;
+    previous_scale_z[0] = previous_scale_z[0] +1 ;
+    //max
+    previous_scale_x[1] = previous_scale_x[1] -2 ;
+    previous_scale_y[1] = previous_scale_y[1] -2 ;
+    previous_scale_z[1] = previous_scale_z[1] -2 ;
+    //min
+    scale_x[0] = scale_x[0] +1 ;
+    scale_y[0] = scale_y[0] +1 ;
+    scale_z[0] = scale_z[0] +1 ;
+    //max
+    scale_x[1] = scale_x[1] -2 ;
+    scale_y[1] = scale_y[1] -2 ;
+    scale_z[1] = scale_z[1] -2 ;
+   // Serial.println("Adaptation commited");
+    counter = 0;
+  }
+ /* 
+  Serial.println();
+  Serial.print("X: ");
+  Serial.print(scale_x[0]);
+  Serial.print("->");
+  Serial.print(scale_x[1]);
+  Serial.print("/previous:");
+  Serial.print(previous_scale_x[0]);
+  Serial.print("->");
+  Serial.print(previous_scale_x[1]);
+  Serial.println();
+  Serial.print("Y: ");
+  Serial.print(scale_y[0]);
+  Serial.print("->");
+  Serial.print(scale_y[1]);
+  Serial.print("/previous:");
+  Serial.print(previous_scale_y[0]);
+  Serial.print("->");
+  Serial.print(previous_scale_y[1]);
+  Serial.println();
+  Serial.print("Z: ");
+  Serial.print(scale_z[0]);
+  Serial.print("->");
+  Serial.print(scale_z[1]);
+  Serial.print("/previous:");
+  Serial.print(previous_scale_z[0]);
+  Serial.print("->");
+  Serial.print(previous_scale_z[1]);
+  Serial.println();
+  
+  Serial.print("Current -> X: ");
+  Serial.print(current_coordinates[0]);
+  Serial.print(",Y: ");
+  Serial.print(current_coordinates[1]);
+  Serial.print(",Z: ");
+  Serial.println(current_coordinates[2]);
+  Serial.print("Our x,y,z ->");
+  Serial.print(x);
+  Serial.print(',');
+  Serial.print(y);
+  Serial.print(',');
+  Serial.print(z);
+  Serial.println();
+  Serial.println("-------------");
+  
+  delay(1000);
+  counter++;
+  */
+/*
   Serial.print("\nx: ");
   Serial.print(x);
   Serial.print(" \ty: ");
   Serial.print(y);
   Serial.print(" \tz: ");
   Serial.print(z);
-  Serial.print("\tBLAH");
-  delay(500); //make it readable
+  Serial.print("\tG*10^-2");
+ delay(500); //make it readable  
+*/
+     Serial2.write(0xB0); // MIDI control change; channel 3
+     Serial2.write(0x2A); // MIDI controller #1
+     Serial2.write(x); // MIDI controller value of 127
+      
+     Serial2.write(0xB0); // MIDI control change; channel 3
+     Serial2.write(0x2B); // MIDI controller #1
+     Serial2.write(y); // MIDI controller value of 127
+     
+     Serial2.write(0xB0); // MIDI control change; channel 3
+     Serial2.write(0x2C); // MIDI controller #1
+     Serial2.write(z); // MIDI controller value of 127
+delay(70);
 }
+
+
+
+
+
+
+int normalize(int newreading) {
+  if (newreading > 180){
+    return 180;
+  } else {
+    return newreading;
+  }
+  if (newreading < -180){
+    return -180 ;
+  } else {
+    return newreading;
+  }
+}
+
+
+
+

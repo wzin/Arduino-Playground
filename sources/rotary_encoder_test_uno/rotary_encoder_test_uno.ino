@@ -1,83 +1,76 @@
-//encoder(PIN A) -> A0
-//encoder(PIN B) -> A1
-//*PIN A and B are located on the both sides of encoder
-//encoder(PIN MIDDLE) -> ground
-/* Rotary encoder read example */
-#define ENC_A 10  
-#define ENC_B 11
-#define ENC_PORT PINE
-int magicnumber = 2;
- 
+int encoderPins[] = {22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52}; // definicja tablicy z numerami pinow
+int numberOfPins = sizeof(encoderPins)/sizeof(int); // ilosc elementow tablicy encoderPins czyli ilosc pinow
+int numberOfEncoders = numberOfPins/2;
+int encoderState[] = {0}; // stan wartosci inkrementalnej encodera midi 0-255
+int pinHistory[] = {0}; // binarny stan na danym pinie
+int counter = 0;    //this variable will be changed by encoder input
+int readDataA;  //tymczasowa wartosc na aktualne zczytanie pinu A
+int readDataB;  //tymczasowa wartosc na aktualne zczytanie pinu B
+int pinA; //Zmienna uzywana lokalnie do pinu A 
+int pinB; //Zmienna uzywana lokalnie do pinu B
+int i = 0; // blah i
+int a = 0; // blah a
+
+
+// SETUP FUNCTIONS
+void setupEncoderMatrix() {
+Serial.println("Cleaning logical encoder counters");
+for(i=0 ; i <= numberOfEncoders ; i++) { 
+  Serial.print(i);
+  Serial.print(",");
+  encoderState[i] = 0; 
+  }
+  Serial.println("Done.");
+} 
+void setupDigitalInputs(){
+  Serial.println("Setting physical inputs and pullup resistors");
+  for (i=0;  i < numberOfPins ; i++ ) {
+    Serial.print(encoderPins[i]);
+    Serial.print(","); 
+    pinMode(encoderPins[i], INPUT);
+    digitalWrite(encoderPins[i], HIGH);
+  }
+  Serial.println("Done.");
+}
+void setupPinHistory() {
+Serial.println("Cleaning logical pin states history");
+for(i=0 ; i < numberOfPins ; i++) { 
+  Serial.print(i);
+  Serial.print(",");
+  pinHistory[i] = 0; 
+  }
+Serial.println("Done.");
+} 
+
+// END OF SETUP FUNCTIONS
+
 void setup()
-{
-  /* Setup encoder pins as inputs */
-  pinMode(ENC_A, INPUT);
-  digitalWrite(ENC_A, HIGH);
-  pinMode(ENC_B, INPUT);
-  digitalWrite(ENC_B, HIGH);
-  Serial.begin (9600);
-  Serial.println("Start");
+{ 
+  Serial.begin (115200);
+  Serial.println("BLAH -----------------> Start");
+  Serial.print("Number of pins that we use:"); Serial.println(numberOfPins);
+  Serial.print("We have this number of encoders:");Serial.println(numberOfPins/2);
+  setupDigitalInputs();
+  setupEncoderMatrix();
+  setupPinHistory();
 }
  
 void loop()
 {
- static uint8_t counter = 0;    //this variable will be changed by encoder input
- int8_t tmpdata;
- /**/
-  tmpdata = read_encoder();
-  if( tmpdata ) {
-  switch (counter) {
-    case 0:
-      if (tmpdata == +1 ) {
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);
-      counter += tmpdata*magicnumber;
-      break;
-      }
-      if (tmpdata == -1) {
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);
-      break;
-      }
-    case 255:
-      if (tmpdata == -1 ) {
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);
-      counter += tmpdata*magicnumber;
-      break;
-      }
-      if (tmpdata == +1) {
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);
-      break;
-      }
-    case 254:
-      if (tmpdata == -1 ) {
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);
-      counter += tmpdata*magicnumber;
-      break;
-      }
-      if (tmpdata == +1) {
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);
-      break;
-      }
-    default:
-      Serial.print("Counter value: ");
-      Serial.println(counter, DEC);
-      counter += tmpdata*magicnumber;   
-  }
+  for (i=0 ; i <= numberOfPins ; i++  ) {
+  pinA = i;
+  pinB = i+1;
+  i++;
+  readDataA = digitalRead(encoderPins[pinA]);
+  readDataB = digitalRead(encoderPins[pinB]);
+  if ( readDataA != pinHistory[pinA] | readDataB != pinHistory[pinB] ) {
+    Serial.print("PIN number: "); Serial.print(encoderPins[pinA]); Serial.print("/current state : "); Serial.print(readDataA); Serial.print("/previous:"); Serial.println(pinHistory[pinA]);
+    Serial.print("PIN number: "); Serial.print(encoderPins[pinB]); Serial.print("/current state : "); Serial.print(readDataB); Serial.print("/previous:"); Serial.println(pinHistory[pinB]);
+    pinHistory[pinA] = readDataA;
+    pinHistory[pinB] = readDataB;
   }  
-}
- 
-/* returns change in encoder state (-1,0,1) */
-int8_t read_encoder()
-{
-  static int8_t enc_states[] = {0,-1,1,0,1,0,0,-1,-1,0,0,1,0,1,-1,0};
-  static uint8_t old_AB = 0;
-  /**/
-  old_AB <<= 2;                 //remember previous state
-  old_AB |= ( ENC_PORT & 0x03 );  //add current state
-  return ( enc_states[( old_AB & 0x0f )]);
+  }
+  delay(1000);
+  Serial.println("---------------");
+  
 }
